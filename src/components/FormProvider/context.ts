@@ -1,16 +1,38 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
 import {
   FormProviderState,
   FormStateSubscriber,
+  FormStateUnsubscriber,
   FormStateUpdater,
+  OnFormStateUpdateCallback,
 } from "./types";
 
 export const FormContext = createContext<{
   state: FormProviderState;
   update: FormStateUpdater;
   subscribe: FormStateSubscriber;
-}>({ state: {}, update: () => null, subscribe: () => null });
+  unsubscribe: FormStateUnsubscriber;
+}>({
+  state: {},
+  update: () => null,
+  subscribe: () => null,
+  unsubscribe: () => null,
+});
 
-export function useReactForm() {
-  return useContext(FormContext);
+interface ReactFormProps {
+  formId: string;
+  onUpdate?: OnFormStateUpdateCallback;
+}
+export function useReactForm({ onUpdate, formId }: ReactFormProps) {
+  const { state, subscribe, unsubscribe } = useContext(FormContext);
+
+  useEffect(() => {
+    if (!onUpdate) return;
+    subscribe(formId, onUpdate);
+    return () => {
+      unsubscribe(formId, onUpdate);
+    };
+  }, [formId, onUpdate]);
+
+  return state[formId];
 }

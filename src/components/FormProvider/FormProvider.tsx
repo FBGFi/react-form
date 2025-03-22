@@ -5,7 +5,9 @@ import {
   FormProviderState,
   FormStateObservers,
   FormStateSubscriber,
+  FormStateUnsubscriber,
   FormStateUpdater,
+  OnFormStateUpdateCallback,
 } from "./types";
 import { FormContext } from "./context";
 
@@ -25,7 +27,6 @@ export function FormProvider({ children }: FormProviderProps) {
   };
 
   const subscribe: FormStateSubscriber = (formId, onUpdate) => {
-    console.log("subscribed");
     if (!observers.current[formId]) {
       observers.current[formId] = [onUpdate];
     } else {
@@ -33,15 +34,29 @@ export function FormProvider({ children }: FormProviderProps) {
     }
   };
 
-  // TODO this does cleanup incorrectly, after HMR observers are not readded
-  useEffect(() => () => {
-    console.log("cleaning up");
-    observers.current = {};
-  });
+  const unsubscribe: FormStateUnsubscriber = (formId, onUpdate) => {
+    if (observers.current[formId]) {
+      observers.current[formId] = observers.current[formId].reduce<
+        OnFormStateUpdateCallback[]
+      >((newObservers, observer) => {
+        if (observer !== onUpdate) {
+          newObservers.push(observer);
+        }
+        return newObservers;
+      }, []);
+    }
+  };
+
+  useEffect(
+    () => () => {
+      observers.current = {};
+    },
+    [],
+  );
 
   return (
     <FormContext.Provider
-      value={{ state: stateRef.current, update, subscribe }}>
+      value={{ state: stateRef.current, update, subscribe, unsubscribe }}>
       {children}
     </FormContext.Provider>
   );

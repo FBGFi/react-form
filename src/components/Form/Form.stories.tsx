@@ -8,6 +8,7 @@ export default {
   component: Form,
   args: {
     id: "example_form",
+    onSubmit: (state) => console.log("onSubmit", state),
     children: (
       <>
         <input id="example_form_text_input" />
@@ -15,19 +16,18 @@ export default {
         <div>
           <input id="example_form_nested_input" />
         </div>
+        <button>Submit</button>
       </>
     ),
   },
   decorators: [
     (Story) => {
-      const { subscribe } = useReactForm();
-
       const onUpdate = (state: FormState) => {
         console.log(state);
       };
 
-      subscribe("example_form", onUpdate);
-
+      const state = useReactForm({ formId: "example_form", onUpdate });
+      console.log("this should not log every render: ", state);
       return <Story />;
     },
   ],

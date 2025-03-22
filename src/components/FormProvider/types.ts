@@ -16,7 +16,8 @@ export type FormStateUpdater = (
   value: string,
 ) => void;
 
-type OnFormStateUpdateCallback = (state: FormState) => void;
+export type OnFormStateUpdateCallback = (state: FormState) => void;
+
 export type FormStateSubscriber = (
   formId: string,
   onUpdate: OnFormStateUpdateCallback,
@@ -25,3 +26,8 @@ export type FormStateSubscriber = (
 export interface FormStateObservers {
   [formId: string]: OnFormStateUpdateCallback[];
 }
+
+export type FormStateUnsubscriber = (
+  formId: string,
+  onUpdate: OnFormStateUpdateCallback,
+) => void;
