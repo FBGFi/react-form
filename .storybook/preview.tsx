@@ -1,4 +1,5 @@
 import type { Preview } from "@storybook/react";
+import { FormProvider } from "../src/components/FormProvider/FormProvider";
 
 const preview: Preview = {
   parameters: {
@@ -9,6 +10,13 @@ const preview: Preview = {
       },
     },
   },
+  decorators: [
+    (Story) => (
+      <FormProvider>
+        <Story />
+      </FormProvider>
+    ),
+  ],
 };
 
 export default preview;
